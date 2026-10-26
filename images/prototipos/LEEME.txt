@@ -1,0 +1,4 @@
+Guarda aquí tus imágenes de prototipo con estos nombres exactos (JPG):
+productor.jpg, cuidado.jpg, resguardo.jpg, investigacion.jpg, tradicion.jpg y espacio-landing.jpg.
+Tamaño sugerido: 1600x1000 px (formato 16:10). Si no existe el archivo, se muestra el espacio vacío.
+Los dibujo-*.png son dibujos de diseño ilustrativos.

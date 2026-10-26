@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Plataforma Xunaka: software, hardware, hoja de ruta e inversión</title>
+<meta name="description" content="Todo Xunaka ordenado: qué es, el software que ya funciona, los prototipos de hardware, la hoja de ruta, el modelo de negocio y qué buscamos.">
+<link rel="icon" href="images/favicon-96x96.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/xk.css">
+<style>
+section{margin-top:2.8rem}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.8rem}.g .card{margin:0}
+.big{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(1.2rem,3vw,1.6rem);border-left:5px solid var(--gold);padding-left:1rem;margin:1.2rem 0}
+.ph{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.8rem;counter-reset:f}
+.ph .card{margin:0;border-top:4px solid var(--gold)}.ph h3:before{counter-increment:f;content:"Fase " counter(f) ". "}
+.anch{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}.anch a{border:1px solid var(--line);border-radius:99px;padding:.25rem .8rem;text-decoration:none;font-size:.9rem;background:var(--card)}
+</style></head><body>
+<header class="top"><a href="index.html"><img src="images/wordmark.png" alt="Xunaka" style="filter:brightness(0) invert(1)"></a>
+<nav aria-label="Principal"><a href="index.html">Inicio</a><a href="plataforma.html" aria-current="page">Plataforma</a><a href="transparencia.html">Transparencia</a><a href="academia.html">Academia</a></nav></header>
+<main>
+<h1>Todo Xunaka, en orden</h1>
+<p class="big">Xunaka vende la confianza, el linaje y el conocimiento necesarios para rescatar y multiplicar a Xunáan Kaab sin dañarla. El hardware, el software y la red son partes de un mismo sistema.</p>
+<nav class="anch" aria-label="Secciones"><a href="#mapa">Mapa</a><a href="#software">Software</a><a href="#hardware">Hardware</a><a href="#ruta">Hoja de ruta</a><a href="#negocio">Negocio</a><a href="#busca">Qué buscamos</a></nav>
+
+<section id="mapa"><h2>Cómo recorrer el sitio</h2>
+<div class="g">
+<div class="card"><h3>1. Entender</h3><p>La <a href="index.html">página principal</a> cuenta el problema y la propuesta. La <a href="academia.html">Academia</a> explica la especie y su contexto.</p></div>
+<div class="card"><h3>2. Probar</h3><p><a href="registro.html">Registro</a>, <a href="mvp.html">Herramientas</a> y <a href="demo.html">Demo</a>: software que se puede usar ahora.</p></div>
+<div class="card"><h3>3. Ver el alcance</h3><p><a href="modelos.html">Los cinco modelos</a>, <a href="prototipos.html">Prototipos</a> de cada pieza y el <a href="ecosistema.html">Ecosistema</a>: red, adopción, Atrae, instituciones, tradición, atlas y datos.</p></div>
+<div class="card"><h3>4. Verificar</h3><p><a href="transparencia.html">Transparencia</a>: qué está hecho, qué no y en qué evidencia nos basamos.</p></div>
+<div class="card"><h3>5. Colaborar</h3><p><a href="pitch.html">Pitch y preguntas difíciles</a> y la <a href="propuesta-piloto.html">propuesta de piloto</a> para programas de rescate.</p></div>
+</div></section>
+
+<section id="software"><h2>Software</h2>
+<p class="lead">El software puede avanzar sin hardware, y por eso va primero.</p>
+<div class="card scroll"><table><tr><th>Pieza</th><th>Qué hace</th><th>Estado</th></tr>
+<tr><td><a href="registro.html">Registro y pasaporte con QR</a></td><td>Alta de colonias, linaje, revisiones encadenadas, triage, exportación</td><td><span class="chip s-info">MVP funcional, solo en el navegador</span></td></tr>
+<tr><td><a href="mvp.html">Verificador de linaje</a></td><td>Detecta ancestros comunes entre dos colonias</td><td><span class="chip s-info">MVP funcional, datos de ejemplo</span></td></tr>
+<tr><td><a href="mvp.html">Simulador de la máquina de estados</a></td><td>Normal, verificación, transporte autorizado, alerta y silencio</td><td><span class="chip s-info">Simulación; umbrales sin calibrar</span></td></tr>
+<tr><td><a href="demo.html">Panel de triage y Modo Incidente</a></td><td>Pantallas de ejemplo y verificador de cadena de hashes</td><td><span class="chip s-info">Demo con datos de ejemplo</span></td></tr>
+<tr><td>Servidor compartido, cuentas y permisos</td><td>Datos entre personas y dispositivos</td><td><span class="chip s-bad">No existe todavía</span></td></tr></table></div></section>
+
+<section id="hardware"><h2>Hardware: los prototipos se mantienen</h2>
+<p class="lead">Ningún componente electrónico vive dentro del espacio de las abejas. Todo está especificado; nada está armado todavía. <a href="prototipos.html">Ver cada pieza con su dibujo, componentes y funcionamiento</a>.</p>
+<div class="card scroll"><table><tr><th>Módulo</th><th>Función</th><th>Prioridad</th></tr>
+<tr><td>Xunaka Core</td><td>Nodo común: microcontrolador con LoRa, celdas de carga, temperatura y humedad, IMU, ubicación bajo demanda, reloj y batería</td><td>Primero</td></tr>
+<tr><td>Xunaka Habitat</td><td>Plataforma sensora para caja tecnificada</td><td>Prototipo prioritario</td></tr>
+<tr><td>Xunaka Gateway</td><td>Recibe datos de varios nodos por LoRa; alimentable con panel solar</td><td>Junto al Core</td></tr>
+<tr><td>Xunaka Cradle</td><td>Soporte ajustable para jobón, sin modificar el tronco</td><td>Segundo, según tiempo</td></tr>
+<tr><td>Xunaka Atrae</td><td>Caja trampa cebada con cerumen o geopropóleo; el mismo sensor detecta ocupación</td><td>Investigación</td></tr></table></div>
+<p class="lead">Estado actual: <span class="chip s-warn">Especificado, aún sin armar</span>. La validación en campo con una colonia real depende de conseguir acceso a través de un colectivo. Detalle en <a href="transparencia.html">Transparencia</a>.</p></section>
+
+<section id="ruta"><h2>Hoja de ruta</h2>
+<p class="lead">Sin fechas ni cifras que no podamos sostener.</p>
+<div class="ph">
+<div class="card"><h3>Demostrar</h3><p>Software funcional, prototipo de banco del Core con una caja vacía, pruebas con pesas conocidas y registro de cada resultado.</p></div>
+<div class="card"><h3>Validar con una colonia</h3><p>Piloto con un colectivo o programa de rescate, con supervisión de un meliponicultor experto y pasaporte desde el primer día.</p></div>
+<div class="card"><h3>Ampliar</h3><p>Más colonias, servidor compartido, Gateway con panel solar y primeras pruebas de Atrae.</p></div>
+<div class="card"><h3>Escalar</h3><p>Kits de adopción con plan de cuidado, certificación de trazabilidad y datos agregados con consentimiento.</p></div>
+</div></section>
+
+<section id="negocio"><h2>Modelo de negocio</h2>
+<p class="lead">Varias fuentes, sin depender de una sola. Propuestas; no hay ingresos todavía.</p>
+<div class="g">
+<div class="card"><h3>Institucional</h3><p>Suscripción por colonia monitoreada y Gateway por sitio, para bancos genéticos, universidades y programas de rescate.</p></div>
+<div class="card"><h3>Hogares</h3><p>Kit de adopción con colonia de división técnica y plan de cuidado. Nunca captura silvestre.</p></div>
+<div class="card"><h3>Atrae</h3><p>Venta o renta de cajas trampa instrumentadas.</p></div>
+<div class="card"><h3>Xunaka Trazado</h3><p>Certificación de trazabilidad licenciada a productores.</p></div>
+<div class="card"><h3>Fondo mutual</h3><p>Riesgo compartido entre colectivos con colonias monitoreadas.</p></div>
+<div class="card"><h3>Conservación</h3><p>Financiamiento para banco genético y documentación de incidentes.</p></div>
+</div>
+<div class="note">No presentamos cifras de mercado ni proyecciones porque aún no las hemos medido.</div></section>
+
+<section id="busca"><h2>Qué buscamos</h2>
+<div class="card"><ul>
+<li><b>Un programa o colectivo piloto</b> que nos permita registrar y acompañar colonias reales.</li>
+<li><b>Un aliado apícola o cultural</b> que oriente cada decisión de manejo.</li>
+<li><b>Apoyo para construir y probar el prototipo</b> de hardware. Monto por definir con un presupuesto real.</li>
+<li><b>Orientación legal</b> sobre manejo de especies nativas y el marco que podría cambiar con el Amparo en Revisión 790/2025.</li></ul></div>
+<p>Contacto: <a href="mailto:gabrielgarziaz@gmail.com">gabrielgarziaz@gmail.com</a>.</p></section>
+</main></body></html>

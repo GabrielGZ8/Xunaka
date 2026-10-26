@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Demo de la plataforma | Xunaka</title>
+<meta name="description" content="Demo navegable con datos de ejemplo: panel de triage, pasaporte de colonia y Modo Incidente con verificador de cadena de hashes.">
+<link rel="icon" href="images/favicon-96x96.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/xk.css">
+</head><body>
+<header class="top"><a href="index.html"><img src="images/wordmark.png" alt="Xunaka" style="filter:brightness(0) invert(1)"></a>
+<nav aria-label="Principal"><a href="index.html">Inicio</a><a href="plataforma.html" aria-current="page">Plataforma</a><a href="transparencia.html">Transparencia</a><a href="academia.html">Academia</a></nav></header>
+<div class="demo-banner" role="note">DATOS DE EJEMPLO: simulación sin colonias, programas ni sensores reales.</div>
+<main>
+<h1>Así se vería Xunaka en uso</h1>
+<p class="lead">Tres pantallas de la plataforma. El panel no diagnostica: indica a qué colonia conviene que vaya una persona hoy. Los nombres y valores son ficticios.</p>
+<div class="tabs" role="tablist">
+<button role="tab" id="t-triage" aria-selected="true" data-p="triage">Triage</button>
+<button role="tab" id="t-pasaporte" aria-selected="false" data-p="pasaporte">Pasaporte</button>
+<button role="tab" id="t-incidente" aria-selected="false" data-p="incidente">Modo Incidente</button>
+</div>
+
+<section id="triage" role="tabpanel" aria-labelledby="t-triage">
+<h2>Programa Ejemplo: panel de triage</h2>
+<div class="sum" id="sum"></div>
+<h3 style="margin-top:1.2rem">Atención sugerida</h3>
+<div id="list"></div>
+</section>
+
+<section id="pasaporte" role="tabpanel" aria-labelledby="t-pasaporte" hidden>
+<h2>Pasaporte de colonia</h2>
+<p class="lead">El pasaporte pertenece a la colonia, no a su responsable: si cambia de manos, el historial se conserva.</p>
+<div class="card" id="pp"></div>
+</section>
+
+<section id="incidente" role="tabpanel" aria-labelledby="t-incidente" hidden>
+<h2>Incidente ejemplo XNK-INC-0001</h2>
+<div class="note"><b>Xunaka no determina que ocurrió un robo ni la causa de una mortandad.</b> Registra evidencia para que una persona, una fiscalía o un laboratorio puedan investigar.</div>
+<div class="card"><dl>
+<dt>Colonia</dt><dd>XNK-EJ-0004</dd><dt>Estado</dt><dd>Comunicación interrumpida (alerta por silencio)</dd>
+<dt>Ubicación pública</dt><dd>Municipio de ejemplo</dd><dt>Ubicación exacta</dt><dd>Privada, solo para personas autorizadas</dd></dl></div>
+<h3>Registro de eventos encadenado</h3>
+<p class="lead">Cada evento guarda el hash SHA-256 del anterior. Cambia un evento y comprueba qué pasa con la cadena. Esto corre en tu navegador con eventos inventados.</p>
+<div class="chain" id="chain" aria-live="polite"></div>
+<p><button class="btn" id="vfy">Verificar cadena</button> <button class="btn alt" id="alt">Alterar evento 3</button> <button class="btn alt" id="rst">Restaurar</button></p>
+<p id="res" role="status"></p>
+<div class="note"><b>Límite honesto:</b> la cadena solo delata una alteración si el último hash está guardado en otro lugar (por ejemplo en el Gateway o en la plataforma). Si alguien se llevara el dispositivo con todo el registro, podría reescribirlo entero. Por eso el diseño prevé copias fuera del nodo.</div>
+</section>
+</main>
+<script>
+const C=[
+{id:'XNK-EJ-0004',s:'bad',st:'Incidente',why:'Silencio de señal y movimiento detectado',act:'Revisar incidente y contactar a la persona responsable',or:'División técnica',m:'XNK-EJ-0001',stage:3},
+{id:'XNK-EJ-0011',s:'warn',st:'Requiere revisión',why:'Descenso de peso sostenido durante 4 días',act:'Visita presencial',or:'Rescate',m:'No aplica',stage:2},
+{id:'XNK-EJ-0017',s:'warn',st:'Requiere revisión',why:'Batería baja del nodo',act:'Cambiar o recargar la batería',or:'División técnica',m:'XNK-EJ-0002',stage:4},
+{id:'XNK-EJ-0021',s:'info',st:'En traslado',why:'Movimiento autorizado por su responsable',act:'Seguimiento en aclimatación',or:'División técnica',m:'XNK-EJ-0001',stage:2},
+{id:'XNK-EJ-0002',s:'ok',st:'Normal',why:'Sin eventos anómalos',act:'Ninguna',or:'Rescate',m:'No aplica',stage:4},
+{id:'XNK-EJ-0007',s:'ok',st:'Normal',why:'Sin eventos anómalos',act:'Ninguna',or:'Banco genético (ejemplo)',m:'No aplica',stage:4}];
+const ST=['Rescate o división','Estabilización','Aclimatación','Adopción o traslado','Seguimiento'];
+const $=s=>document.querySelector(s);
+const cnt=k=>C.filter(c=>c.s==k).length;
+$('#sum').innerHTML=[['Colonias en el ejemplo',C.length],['Normales',cnt('ok')],['Requieren revisión',cnt('warn')],['En traslado',cnt('info')],['Incidentes',cnt('bad')]].map(a=>`<div><b>${a[1]}</b>${a[0]}</div>`).join('');
+$('#list').innerHTML=C.filter(c=>c.s!='ok').map(c=>`<button class="row" data-id="${c.id}"><span><b>${c.id}</b><br><small>${c.why}</small></span><span><span class="chip s-${c.s}">${c.st}</span><br><small>Acción sugerida: ${c.act}</small></span></button>`).join('');
+function show(p){document.querySelectorAll('[role=tab]').forEach(t=>t.setAttribute('aria-selected',t.dataset.p==p));document.querySelectorAll('[role=tabpanel]').forEach(s=>s.hidden=s.id!=p)}
+document.querySelectorAll('[role=tab]').forEach(t=>t.onclick=()=>show(t.dataset.p));
+function pass(id){const c=C.find(x=>x.id==id);show('pasaporte');
+$('#pp').innerHTML=`<h3>${c.id} · Melipona beecheii</h3><span class="chip s-${c.s}">${c.st}</span>
+<div class="tl">${ST.map((t,i)=>`<span class="${i<=c.stage?'done':''}">${t}</span>`).join('')}</div>
+<dl><dt>Origen</dt><dd>${c.or}</dd><dt>Colonia madre</dt><dd>${c.m}</dd><dt>Municipio</dt><dd>Municipio de ejemplo</dd><dt>Ubicación exacta</dt><dd>Protegida</dd><dt>Responsable</dt><dd>Persona ejemplo, Programa Ejemplo</dd><dt>Transferencias</dt><dd>1 (ejemplo)</dd><dt>Último motivo de atención</dt><dd>${c.why}</dd></dl>
+<p><small>Cada colonia sana en el ejemplo tiene su propio pasaporte; elige otra desde el panel.</small></p>
+<p>${C.map(x=>`<button class="btn alt" data-id="${x.id}" style="margin:.15rem">${x.id}</button>`).join('')}</p>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b)pass(b.dataset.id)});
+const EV0=['Encendido del nodo y calibración','Peso estable, sin anomalías','Movimiento detectado: verificación en curso','Silencio de señal: alerta enviada','Activación de ubicación bajo demanda'];
+let EV=[...EV0];const H=[];
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function build(){const hs=[];let p='0';for(const e of EV){p=await sha(p+'|'+e);hs.push(p)}return hs}
+async function init(){const h=await build();H.length=0;H.push(...h);draw(-1)}
+function draw(br){$('#chain').innerHTML=EV.map((e,i)=>`<div class="blk ${br>=0&&i>=br?'broken':''}"><b>Evento ${i+1}</b><br>${e}<code>${H[i].slice(0,16)}…</code></div>`).join('')}
+$('#alt').onclick=()=>{EV[2]='Movimiento sin importancia (texto alterado)';draw(-1);$('#res').textContent='Evento 3 modificado. Pulsa "Verificar cadena".'};
+$('#rst').onclick=()=>{EV=[...EV0];draw(-1);$('#res').textContent='Registro restaurado.'};
+$('#vfy').onclick=async()=>{const n=await build();const i=n.findIndex((x,k)=>x!==H[k]);
+if(i<0){draw(-1);$('#res').textContent='Cadena íntegra: todos los hashes coinciden.'}else{draw(i);$('#res').textContent=`Cadena rota a partir del evento ${i+1}: el registro fue alterado después de guardarse.`}};
+init();
+</script>
+</body></html>

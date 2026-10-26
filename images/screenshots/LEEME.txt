@@ -1,0 +1,4 @@
+Capturas reales de la plataforma Xunaka (cuando existan):
+pasaporte.png, incidente.png, triage.png, atrae.png
+Tamano recomendado 1600x1000 (16:10). Mientras no existan, el sitio muestra un placeholder.
+Para una demo navegable con datos de ejemplo, ver demo.html.

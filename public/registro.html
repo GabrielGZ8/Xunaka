@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Registro de colonias con pasaporte y QR | Xunaka</title>
+<meta name="description" content="MVP funcional: registra colonias, genera su pasaporte con QR, anota revisiones encadenadas por hashes y obtén una lista de atención sugerida.">
+<link rel="icon" href="images/favicon-96x96.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/xk.css">
+<style>
+label{display:block;font-size:.9rem;color:var(--mut);margin:.5rem 0 .15rem}
+select,input[type=text],input[type=number]{font:inherit;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);max-width:100%;width:100%}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
+section{margin-top:2rem}.qr svg{width:150px;height:150px;background:#fff;padding:6px;border-radius:8px}
+.log{padding-left:1.1rem;margin:.4rem 0;font-size:.9rem}.log code{font-size:.72rem;color:var(--mut)}
+</style></head><body>
+<header class="top"><a href="index.html"><img src="images/wordmark.png" alt="Xunaka" style="filter:brightness(0) invert(1)"></a>
+<nav aria-label="Principal"><a href="index.html">Inicio</a><a href="plataforma.html" aria-current="page">Plataforma</a><a href="transparencia.html">Transparencia</a><a href="academia.html">Academia</a></nav></header>
+<div class="demo-banner" role="note">MVP SIN SERVIDOR: tus datos se guardan solo en este navegador. No hay cuenta ni base de datos compartida.</div>
+<main>
+<h1>Registro de colonias</h1>
+<p class="lead">Da de alta una colonia, consulta su pasaporte, anota revisiones y mira cuáles conviene visitar primero. Funciona desde el celular. Es triage: sugiere a dónde ir, no diagnostica.</p>
+<p id="warn" role="alert"></p>
+<div class="sum" id="sum"></div>
+
+<section><h2>Atención sugerida</h2>
+<label for="dy">Se sugiere visita si no hay revisión en (días)</label><input type="number" id="dy" min="1" max="90" style="width:6rem">
+<div id="tri"></div></section>
+
+<div class="two">
+<section><h2>Registrar colonia</h2><div class="card">
+<label for="al">Apodo (opcional)</label><input type="text" id="al">
+<label for="or">Origen</label><select id="or"><option>Rescate</option><option>División técnica</option><option>Adopción o traslado</option><option>Banco genético</option></select>
+<label for="ma">Colonia madre</label><select id="ma"></select>
+<label for="mu">Municipio (no se guarda ubicación exacta)</label><input type="text" id="mu">
+<label for="re">Responsable</label><input type="text" id="re">
+<p><button class="btn" id="add">Registrar</button></p><p id="am" role="status"></p></div></section>
+<section><h2>Colonias</h2><div id="lst"></div>
+<p><button class="btn alt" id="ex">Exportar JSON</button> <label class="btn alt" style="display:inline-block;margin:0;color:var(--ink)">Importar<input type="file" id="im" accept=".json" hidden></label> <button class="btn alt" id="clr">Borrar todo</button></p></section>
+</div>
+
+<section id="pas" hidden><h2>Pasaporte</h2><div class="card" id="pp"></div></section>
+<div class="note"><b>Privacidad por diseño:</b> solo se guarda el municipio. Un QR abre este pasaporte únicamente en el navegador que tiene los datos; para compartirlo entre personas haría falta un servidor, que este MVP no tiene. <b>Integridad:</b> cada revisión guarda el hash de la anterior, así que editar el historial se nota al verificar, siempre que conserves una copia exportada.</div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),KEY='xunaka_registro_v1';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let D={c:[],days:14};
+try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.c))D=x}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D));$('#warn').textContent=''}catch(e){$('#warn').textContent='Este navegador no permite guardar datos; se pierden al cerrar la página. Usa Exportar JSON.'}}
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const ST={normal:['Normal','s-ok'],revisar:['Requiere revisión','s-warn'],incidente:['Incidente','s-bad'],traslado:['En traslado','s-info']};
+const est=c=>c.r.length?c.r[c.r.length-1].e:'normal';
+const last=c=>new Date(c.r.length?c.r[c.r.length-1].t:c.f);
+const dias=c=>Math.floor((Date.now()-last(c))/864e5);
+const chip=c=>{const s=ST[est(c)];return `<span class="chip ${s[1]}">${s[0]}</span>`};
+function render(){
+$('#dy').value=D.days;
+const n=k=>D.c.filter(c=>est(c)===k).length;
+$('#sum').innerHTML=[['Colonias',D.c.length],['Normales',n('normal')],['Requieren revisión',n('revisar')],['En traslado',n('traslado')],['Incidentes',n('incidente')]].map(a=>`<div><b>${a[1]}</b>${a[0]}</div>`).join('');
+const need=D.c.map(c=>{const m=[];if(est(c)==='incidente')m.push('incidente abierto');if(est(c)==='revisar')m.push('marcada para revisión');if(dias(c)>D.days)m.push(`${dias(c)} días sin revisión`);return{c,m}}).filter(x=>x.m.length).sort((a,b)=>(est(b.c)==='incidente')-(est(a.c)==='incidente')||b.m.length-a.m.length);
+$('#tri').innerHTML=need.length?need.map(x=>`<button class="row" data-id="${x.c.id}"><span><b>${x.c.id}</b> ${esc(x.c.a)}<br><small>${x.m.join(' · ')}</small></span>${chip(x.c)}</button>`).join(''):`<p class="lead">${D.c.length?'Ninguna colonia requiere atención con estos criterios.':'Aún no hay colonias. Registra la primera.'}</p>`;
+$('#lst').innerHTML=D.c.map(c=>`<button class="row" data-id="${c.id}"><span><b>${c.id}</b> ${esc(c.a)}<br><small>${esc(c.o)} · ${esc(c.mu)||'sin municipio'}</small></span>${chip(c)}</button>`).join('');
+$('#ma').innerHTML='<option value="">Ninguna (fundadora)</option>'+D.c.map(c=>`<option>${c.id}</option>`).join('')}
+$('#add').onclick=()=>{let i=D.c.length+1,id;do{id=`XNK-${new Date().getFullYear()}-${String(i++).padStart(4,'0')}`}while(D.c.some(c=>c.id===id));
+D.c.push({id,a:$('#al').value.trim(),o:$('#or').value,m:$('#ma').value,mu:$('#mu').value.trim(),re:$('#re').value.trim(),f:new Date().toISOString(),r:[]});
+save();$('#am').textContent=`Registrada ${id}.`;['#al','#mu','#re'].forEach(s=>$(s).value='');render();open(id)};
+$('#dy').onchange=()=>{D.days=Math.max(1,+$('#dy').value||14);save();render()};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b)open(b.dataset.id)});
+function lin(id){const o=[];let c=D.c.find(x=>x.id===id),g=0;while(c&&g<20){o.push(c.id);c=D.c.find(x=>x.id===c.m);g++}return o}
+function open(id){const c=D.c.find(x=>x.id===id);const p=$('#pas');if(!c){return}
+p.hidden=false;let q='';try{const t=qrcode(0,'M');t.addData(location.href.split('#')[0]+'#'+id);t.make();q=t.createSvgTag(4)}catch(e){q='<small>QR no disponible sin conexión a internet.</small>'}
+$('#pp').innerHTML=`<div class="two"><div><h3>${c.id} · Melipona beecheii</h3>${chip(c)}
+<dl><dt>Apodo</dt><dd>${esc(c.a)||'—'}</dd><dt>Origen</dt><dd>${esc(c.o)}</dd><dt>Colonia madre</dt><dd>${c.m||'Fundadora, sin madre registrada'}</dd><dt>Linaje registrado</dt><dd>${lin(id).join(' ← ')}</dd><dt>Municipio</dt><dd>${esc(c.mu)||'—'}</dd><dt>Ubicación exacta</dt><dd>No registrada</dd><dt>Responsable</dt><dd>${esc(c.re)||'—'}</dd><dt>Registrada</dt><dd>${c.f.slice(0,10)}</dd></dl></div><div class="qr">${q}<br><small>Identificador físico sugerido: marca en la madera además del QR.</small></div></div>
+<h3>Anotar revisión</h3><label for="re_e">Estado observado</label><select id="re_e"><option value="normal">Normal</option><option value="revisar">Requiere revisión</option><option value="traslado">En traslado</option><option value="incidente">Incidente</option></select>
+<label for="re_n">Nota</label><input type="text" id="re_n"><p><button class="btn" id="re_b">Guardar revisión</button> <button class="btn alt" id="re_v">Verificar historial</button></p><p id="re_m" role="status"></p>
+<h3>Historial</h3><ol class="log" reversed>${c.r.slice().reverse().map(r=>`<li>${r.t.slice(0,16).replace('T',' ')} · ${ST[r.e][0]}${r.n?': '+esc(r.n):''}<br><code>${r.h.slice(0,14)}…</code></li>`).join('')||'<li>Sin revisiones.</li>'}</ol>`;
+$('#re_b').onclick=async()=>{const e=$('#re_e').value,n=$('#re_n').value.trim(),t=new Date().toISOString(),ph=c.r.length?c.r[c.r.length-1].h:'0';
+c.r.push({t,e,n,h:await sha(`${ph}|${t}|${e}|${n}`)});save();render();open(id)};
+$('#re_v').onclick=async()=>{let ph='0';for(let i=0;i<c.r.length;i++){const r=c.r[i];if(await sha(`${ph}|${r.t}|${r.e}|${r.n}`)!==r.h){$('#re_m').textContent=`Historial alterado a partir de la revisión ${i+1}.`;return}ph=r.h}$('#re_m').textContent='Historial íntegro: todos los hashes coinciden.'};
+p.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});location.hash=id}
+$('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D,null,1)],{type:'application/json'}));a.download='xunaka_registro.json';a.click()};
+$('#im').onchange=async e=>{try{const x=JSON.parse(await e.target.files[0].text());if(!Array.isArray(x.c))throw 0;D=x;save();render();$('#am').textContent='Importado.'}catch(_){$('#am').textContent='Archivo inválido: se esperaba un JSON exportado por Xunaka.'}};
+$('#clr').onclick=()=>{if(confirm('¿Borrar todas las colonias de este navegador?')){D={c:[],days:14};save();$('#pas').hidden=true;render()}};
+render();const h=decodeURIComponent(location.hash.slice(1));if(h){if(D.c.some(c=>c.id===h))open(h);else $('#am').textContent=`${h} no existe en este navegador: los datos no se comparten entre dispositivos.`}
+</script></body></html>

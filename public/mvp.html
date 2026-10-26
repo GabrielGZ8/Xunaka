@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Herramientas MVP: linaje y simulador del Core | Xunaka</title>
+<meta name="description" content="Dos herramientas funcionales: verificador de parentesco entre colonias y simulador de la máquina de estados con alerta por silencio.">
+<link rel="icon" href="images/favicon-96x96.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/xk.css">
+<style>
+label{display:block;font-size:.9rem;color:var(--mut);margin:.5rem 0 .15rem}
+select,input[type=text],input[type=number]{font:inherit;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);max-width:100%}
+input[type=range]{width:100%}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem}
+.st{font-family:"Source Serif 4",Georgia,serif;font-size:1.6rem;margin:.2rem 0}
+.log{max-height:260px;overflow:auto;font-size:.88rem;margin:0;padding-left:1.1rem}
+.log li{margin:.25rem 0}.log code{color:var(--mut);font-size:.75rem}
+pre.t{margin:.5rem 0;font-size:.85rem;white-space:pre-wrap}
+section{margin-top:2.5rem}
+</style></head><body>
+<header class="top"><a href="index.html"><img src="images/wordmark.png" alt="Xunaka" style="filter:brightness(0) invert(1)"></a>
+<nav aria-label="Principal"><a href="index.html">Inicio</a><a href="plataforma.html" aria-current="page">Plataforma</a><a href="transparencia.html">Transparencia</a><a href="academia.html">Academia</a></nav></header>
+<div class="demo-banner" role="note">SOFTWARE FUNCIONAL, DATOS SIMULADOS: la lógica corre en tu navegador; no hay colonias ni sensores reales.</div>
+<main>
+<h1>Dos piezas de software que ya funcionan</h1>
+<p class="lead">Son el núcleo lógico de dos promesas de Xunaka: evitar cruzas entre parientes cercanos y detectar anomalías sin confundir un silencio con una falla. Úsalas, rómpelas y revisa los límites que declaramos.</p>
+
+<section aria-labelledby="h1l"><h2 id="h1l">1. Verificador de linaje</h2>
+<p class="lead">Dadas dos colonias candidatas a cruzarse, busca ancestros comunes en el registro de pasaportes.</p>
+<div class="two">
+<div class="card"><h3>Comprobar cruza</h3>
+<label for="ca">Colonia A</label><select id="ca"></select>
+<label for="cb">Colonia B</label><select id="cb"></select>
+<label for="th">Se considera cercano si la suma de generaciones hasta el ancestro común es de hasta</label><input type="number" id="th" min="2" max="8" value="4" style="width:5rem">
+<p><button class="btn" id="chk">Comprobar</button></p>
+<div id="out" role="status" aria-live="polite"></div></div>
+<div class="card"><h3>Registrar colonia</h3>
+<label for="nid">Identificador nuevo</label><input type="text" id="nid" placeholder="XNK-EJ-0040">
+<label for="nm">Colonia madre</label><select id="nm"></select>
+<p><button class="btn alt" id="add">Agregar al registro</button> <button class="btn alt" id="rs">Restablecer ejemplo</button></p>
+<p id="msg" role="status"></p><h3>Árbol del registro</h3><pre class="t" id="tree"></pre></div>
+</div>
+<div class="note"><b>Límites:</b> solo ve lo que está registrado. Las colonias fundadoras no tienen madre registrada, así que no se puede descartar que sean parientes. El resultado no es una prueba genética ni un coeficiente de endogamia, y el umbral de cercanía debe fijarlo un especialista en genética.</div></section>
+
+<section aria-labelledby="h2l"><h2 id="h2l">2. Simulador de la máquina de estados</h2>
+<p class="lead">Envía lecturas simuladas del nodo y observa los estados NORMAL, VERIFICACIÓN, TRANSPORTE AUTORIZADO y ALERTA, con registro encadenado por hashes.</p>
+<div class="two">
+<div class="card"><h3>Lectura del nodo</h3>
+<label for="w">Peso: <b id="wv">8.0</b> kg</label><input type="range" id="w" min="4" max="12" step="0.1" value="8">
+<label for="tl">Inclinación: <b id="tv">0</b>°</label><input type="range" id="tl" min="0" max="45" value="0">
+<label for="vb">Vibración: <b id="vv">0</b> (0 a 10)</label><input type="range" id="vb" min="0" max="10" value="0">
+<label for="bt">Batería: <b id="bv">80</b>%</label><input type="range" id="bt" min="0" max="100" value="80">
+<p><label><input type="checkbox" id="sg" checked> Señal LoRa presente</label>
+<label><input type="checkbox" id="au"> Transporte autorizado por el responsable</label></p>
+<label for="pn">Lecturas anómalas seguidas para confirmar (N)</label><input type="number" id="pn" min="1" max="10" value="3" style="width:5rem">
+<label for="pm">Lecturas sin señal para alertar (M)</label><input type="number" id="pm" min="1" max="10" value="2" style="width:5rem">
+<p><button class="btn" id="snd">Enviar lectura</button> <button class="btn alt" id="clo">Cerrar alerta</button> <button class="btn alt" id="rz">Reiniciar</button></p>
+<p><b>Escenarios:</b> <button class="btn alt" data-sc="viento">Viento breve</button> <button class="btn alt" data-sc="lev">Levantamiento persistente</button> <button class="btn alt" data-sc="corte">Corte de señal</button> <button class="btn alt" data-sc="bat">Batería agotada</button></p></div>
+<div class="card"><h3>Estado</h3><div class="st" id="st">NORMAL</div><span class="chip s-ok" id="chip">Sin anomalías</span>
+<p id="inf" style="color:var(--mut);margin:.5rem 0"></p>
+<h3>Registro de eventos</h3><ol class="log" id="lg" aria-live="polite"></ol></div>
+</div>
+<div class="note"><b>Cómo decide:</b> una anomalía es un cambio de peso mayor a 0.5 kg entre lecturas, inclinación mayor a 15° o vibración mayor a 6. Si dura N lecturas seguidas, pasa a ALERTA con ubicación bajo demanda, o a TRANSPORTE AUTORIZADO si el responsable lo indicó. Si desaparece antes, se descarta como falso positivo. Si falta la señal M lecturas, hay alerta por silencio, salvo que el último nivel de batería fuera 10% o menos: ahí se registra como silencio probable por batería. <b>Límites:</b> umbrales de ejemplo, sin calibrar con sensores ni colonias reales.</div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+/* ---------- Linaje ---------- */
+const SEED={'XNK-EJ-0001':null,'XNK-EJ-0002':null,'XNK-EJ-0007':null,'XNK-EJ-0004':'XNK-EJ-0001','XNK-EJ-0011':'XNK-EJ-0002','XNK-EJ-0017':'XNK-EJ-0002','XNK-EJ-0021':'XNK-EJ-0001','XNK-EJ-0030':'XNK-EJ-0004'};
+let R={...SEED};
+function anc(id){const o={};let d=0,c=id;while(c){o[c]=d;c=R[c];d++}return o}
+function fill(){const ids=Object.keys(R),o=ids.map(i=>`<option>${i}</option>`).join('');
+const sa=$('#ca').value,sb=$('#cb').value;$('#ca').innerHTML=o;$('#cb').innerHTML=o;if(ids.includes(sa))$('#ca').value=sa;$('#cb').value=ids.includes(sb)?sb:ids[1];
+$('#nm').innerHTML='<option value="">Ninguna (fundadora)</option>'+o;tree()}
+function kids(p,pre){return Object.keys(R).filter(k=>R[k]===p).map(k=>pre+k+'\n'+kids(k,pre+'   ')).join('')}
+function tree(){$('#tree').textContent=Object.keys(R).filter(k=>!R[k]).map(k=>k+' (fundadora)\n'+kids(k,'  └ ')).join('')}
+$('#chk').onclick=()=>{const a=$('#ca').value,b=$('#cb').value,t=+$('#th').value,o=$('#out');
+if(a===b){o.innerHTML='<span class="chip s-bad">Elige dos colonias distintas</span>';return}
+const A=anc(a),B=anc(b);let best=null;
+for(const k in A)if(k in B){const s=A[k]+B[k];if(!best||s<best.s)best={k,s,da:A[k],db:B[k]}}
+if(!best){o.innerHTML=`<span class="chip s-info">Sin ancestro común registrado</span><p>No hay parentesco en el registro, pero los linajes fundadores no están documentados: no se puede descartar parentesco real.</p>`}
+else if(best.s<=t){o.innerHTML=`<span class="chip s-bad">Parentesco cercano registrado</span><p>Ancestro común: <b>${best.k}</b> (${best.da} generación${best.da==1?'':'es'} desde A y ${best.db} desde B; suma ${best.s}). No se recomienda la cruza sin criterio de un especialista.</p>`}
+else{o.innerHTML=`<span class="chip s-warn">Ancestro común lejano</span><p>Ancestro común: <b>${best.k}</b>, suma de generaciones ${best.s}, por encima del umbral de ${t}. Que un especialista confirme el criterio.</p>`}};
+$('#add').onclick=()=>{const id=$('#nid').value.trim().toUpperCase(),m=$('#msg');
+if(!/^[A-Z0-9-]{4,20}$/.test(id)){m.textContent='Identificador inválido: usa 4 a 20 letras, números o guiones.';return}
+if(id in R){m.textContent='Ese identificador ya existe en el registro.';return}
+R[id]=$('#nm').value||null;$('#nid').value='';m.textContent=`Registrada ${id}.`;fill()};
+$('#rs').onclick=()=>{R={...SEED};$('#msg').textContent='Registro restablecido.';$('#out').innerHTML='';fill()};
+fill();
+/* ---------- Simulador ---------- */
+let S;
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function rz(){S={st:'NORMAL',cnt:0,sil:0,prev:+$('#w').value,bat:+$('#bt').value,gnss:false,ph:'0',n:0};$('#lg').innerHTML='';ui('Sin anomalías','s-ok','')}
+function ui(chip,cls,inf){$('#st').textContent=S.st;$('#chip').textContent=chip;$('#chip').className='chip '+cls;$('#inf').textContent=inf+(S.gnss?' Ubicación bajo demanda: ACTIVADA.':'')}
+async function ev(txt){S.n++;const h=await sha(S.ph+'|'+txt);S.ph=h;const li=document.createElement('li');li.innerHTML=`${txt}<br><code>#${S.n} ${h.slice(0,12)}…</code>`;$('#lg').prepend(li)}
+async function send(){const w=+$('#w').value,tl=+$('#tl').value,vb=+$('#vb').value,sg=$('#sg').checked,bt=+$('#bt').value,au=$('#au').checked,N=+$('#pn').value,M=+$('#pm').value;
+if(!sg){S.sil++;if(S.sil>=M&&S.st!=='ALERTA'&&S.st!=='SILENCIO'){if(S.bat<=10){S.st='SILENCIO';await ev(`Silencio probable por batería baja (último nivel ${S.bat}%)`);ui('Posible falla, no alerta','s-warn','Se pide revisar el nodo; no se trata como incidente.')}
+else{S.st='ALERTA';S.gnss=true;await ev(`ALERTA por silencio de señal durante ${S.sil} lecturas; último nivel de batería ${S.bat}%`);ui('Alerta','s-bad','El silencio mismo disparó la alerta.')}}
+else await ev(`Sin señal (${S.sil}/${M})`);return}
+if(S.sil>0){await ev('Señal restablecida');if(S.st==='SILENCIO'){S.st='NORMAL';ui('Sin anomalías','s-ok','')}}S.sil=0;S.bat=bt;
+const an=Math.abs(w-S.prev)>0.5||tl>15||vb>6;const why=[];if(Math.abs(w-S.prev)>0.5)why.push(`peso ${S.prev.toFixed(1)}→${w.toFixed(1)} kg`);if(tl>15)why.push(`inclinación ${tl}°`);if(vb>6)why.push(`vibración ${vb}`);S.prev=w;
+if(S.st==='ALERTA'){await ev('REGISTRO durante alerta: '+(why.join(', ')||'lectura normal'));return}
+if(an){S.cnt++;if(S.cnt>=N){if(au){S.st='TRANSPORTE AUTORIZADO';await ev('Transporte autorizado: '+why.join(', '));ui('Autorizado por el responsable','s-info','Se registra, no se alerta.')}
+else{S.st='ALERTA';S.gnss=true;await ev(`ALERTA: anomalía persistente ${S.cnt} lecturas (${why.join(', ')})`);ui('Alerta','s-bad','Evidencia preservada en el registro.')}}
+else{S.st='VERIFICACIÓN';await ev(`Posible anomalía ${S.cnt}/${N}: ${why.join(', ')}`);ui(`Verificando ${S.cnt}/${N}`,'s-warn','Aún no se alerta: se espera persistencia.')}}
+else{if(S.st==='VERIFICACIÓN'){await ev('Falso positivo descartado: la anomalía no persistió')}if(S.st!=='SILENCIO'){S.st='NORMAL';S.cnt=0;ui('Sin anomalías','s-ok','')}}}
+const rg=[['w','wv',1],['tl','tv',0],['vb','vv',0],['bt','bv',0]];
+rg.forEach(([i,o,d])=>$('#'+i).oninput=()=>$('#'+o).textContent=(+$('#'+i).value).toFixed(d));
+$('#snd').onclick=send;$('#rz').onclick=rz;
+$('#clo').onclick=async()=>{if(S.st==='ALERTA'){S.st='NORMAL';S.cnt=0;S.gnss=false;await ev('Alerta cerrada por una persona responsable');ui('Sin anomalías','s-ok','')}};
+function set(o){for(const k in o){const e=$('#'+k);if(e.type==='checkbox')e.checked=o[k];else e.value=o[k];e.dispatchEvent(new Event('input'))}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const SC={viento:[{vb:8},{vb:0}],lev:[{w:6.5},{w:6.5,tl:25},{w:6.5,tl:25,vb:7},{w:6.5,tl:25,vb:7}],corte:[{sg:false},{sg:false},{sg:false}],bat:[{bt:6},{sg:false},{sg:false},{sg:false}]};
+document.querySelectorAll('[data-sc]').forEach(b=>b.onclick=async()=>{b.parentNode.querySelectorAll('button').forEach(x=>x.disabled=true);
+set({w:8,tl:0,vb:0,bt:80,sg:true,au:false});rz();await wait(200);
+for(const s of SC[b.dataset.sc]){set(s);await send();await wait(700)}
+set({sg:true});b.parentNode.querySelectorAll('button').forEach(x=>x.disabled=false)});
+rz();
+</script></body></html>
